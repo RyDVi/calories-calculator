@@ -1,0 +1,20 @@
+# Базовый образ с Node.js
+FROM node:18-alpine
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+RUN npm install -g pnpm --force
+# RUN npm install -g yarn --force
+
+# Копируем только файлы зависимостей
+COPY frontend/package.json .
+
+# Устанавливаем зависимости
+# RUN yarn install
+RUN pnpm install
+
+# Запускаем Vite в режиме разработки
+# CMD ["yarn", "dev", "--host", "0.0.0.0"]
+CMD ["pnpm", "dev"]
+
+# https://github.com/vitejs/vite/discussions/15532

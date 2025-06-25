@@ -1,0 +1,118 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Общие правила для всех проектов
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.env
+.env.local
+.env.*.local
+.DS_Store
+
+# Общие логи и кэш
+*.log
+*.lock
+*.tmp
+*.temp
+*.swp
+*.swo
+*.swn
+
+# Системные файлы и директории
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Python/Django
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django
+*.sqlite3
+db.sqlite3
+/static/
+*.log
+
+# Виртуальные окружения
+venv/
+.env/
+.env.local
+
+# Миграции
+*/migrations/
+!*/migrations/__init__.py
+
+# Сборка и статика для React/Vite
+
+# Build files
+dist/
+build/
+out/
+!.gitkeep
+
+# Static files
+/public/static/
+vite.svg
+/backend/media/
+
+# Test coverage
+coverage/
+
+# Прочее
+
+# Local environment variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ESLint cache
+.eslintcache
+
+# Editor-specific files
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# MacOS
+*.DS_Store
+
+# Linux
+*~
+
+.direnv
+.venv
+
+# Sentry Config File
+.env.sentry-build-plugin
+backend/static
+backend/staticfiles

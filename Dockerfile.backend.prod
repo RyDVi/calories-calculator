@@ -1,0 +1,36 @@
+# Используем образ с Python 3.12 для продакшн
+FROM python:3.12
+
+# Установить зависимости для сборки Postgres и Python-библиотек
+RUN apt-get update && apt-get install -y && \
+    apt-get install -y libpq-dev build-essential gcc && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файлы зависимостей
+COPY backend/requirements.txt .
+
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем весь код бэкенда
+COPY backend/ .
+
+# Устанавливаем переменные окружения для продакшн
+ENV DJANGO_SETTINGS_MODULE=backend.settings
+ENV PYTHONUNBUFFERED=1
+
+
+# # Собираем статические файлы и делаем миграции
+# RUN python manage.py collectstatic --noinput
+# RUN python manage.py migrate --noinput
+
+# Устанавливаем Gunicorn
+RUN pip install gunicorn
+
+# Запускаем Gunicorn для продакшн-режима
+CMD sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"
+# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]
+# CMD ["gunicorn", "--workers", "3", "--bind", "0.0.0.0:8000", "backend.wsgi:application"]

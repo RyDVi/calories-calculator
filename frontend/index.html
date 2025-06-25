@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="manifest" href="/public/manifest.json" />
+    <link rel="icon" href="/public/app_logo_512.png">
+    <link rel="apple-touch-icon" href="/public/app_logo_512.png" />
+    <meta name="apple-mobile-web-app-capacity" content="yes">
+    <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
+    <script type="module" src="/src/main.tsx"></script>
+    <meta charset="UTF-8">
+    <!-- interactive-widget=resizes-content решает проблемы для android, чтобы виртуальная клавиатура не перекрывала контент уменьшая размера вьюпорта. В ios также работает, но без user-scalable=no  -->
+    <!-- interactive-widget=resizes-visual решает проблемы для ios, чтобы виртуальная клавиатура не перекрывала контент, сдвигая вьюпорт. В android не работает по какой-то причине -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, interactive-widget=resizes-content, virtual-keyboard=resizes-layout" />
+    <script>navigator.serviceWorker.register("/public/service-worker.js")</script> 
+    <title>Калькулятор калорий</title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+        })
+            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(99098059, "init", {
+            clickmap: true,
+            trackLinks: true,
+            accurateTrackBounce: true,
+            webvisor: true
+        });
+    </script>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/99098059" style="position:absolute; left:-9999px;" alt="" /></div>
+    </noscript>
+    <!-- /Yandex.Metrika counter -->
+</body>
+
+</html>

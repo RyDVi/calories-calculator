@@ -1,0 +1,10 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ru.foodstat.twa",
+      "sha256_cert_fingerprints": [
+        "57:56:FC:D2:CA:1F:48:0B:CD:C0:61:BC:F7:71:90:4C:CB:E0:E6:1C:E8:E1:E8:9C:16:C2:EC:BA:3E:47:B7:98"
+      ]
+    }
+  }]

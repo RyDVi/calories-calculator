@@ -1,0 +1,41 @@
+{
+  "name": "Калькулятор калорий",
+  "short_name": "Калькулятор калорий",
+  "description": "Приложение для ведения дневника питания с учётом калорий и БЖУ. Удобно отслеживайте рацион и достигайте ваших целей: похудение, поддержание формы или набор массы.",
+  "theme_color": "#fff",
+  "background_color": "#fff",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/public/app_logo_512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    },
+    {
+        "src": "/public/app_logo_1024.png",
+        "type": "image/png",
+        "sizes": "1024x1024"
+    }
+  ],
+  "display": "standalone",
+  "orientation": "portrait",
+  "lang": "ru",
+  "screenshots": [
+    {
+      "src": "/public/app_screenshot_1.png",
+      "type": "image/png",
+      "sizes": "374x669",
+      "label": "Дневник",
+      "form_factor": "wide"
+    },
+    {
+        "src": "/public/app_screenshot_2.png",
+        "type": "image/png",
+        "sizes": "375x666",
+        "label": "Статистика потребления"
+      }
+  ],
+  "display_override": ["fullscreen", "standalone"]
+}

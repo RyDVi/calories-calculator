@@ -1,0 +1,13 @@
+export const RUSSIAN_LANGUAGE_CODE = 'ru';
+export const ENGLISH_LANGUAGE_CODE = 'en';
+export const DEFAULT_LANGUAGE_CODE = RUSSIAN_LANGUAGE_CODE;
+export const TELEGRAM_MINI_APP_DEFAULT_LANGUAGE_CODE = ENGLISH_LANGUAGE_CODE;
+export const ALLOWED_LANGUAGE_CODES = [
+  ENGLISH_LANGUAGE_CODE,
+  RUSSIAN_LANGUAGE_CODE,
+] as const;
+export const LANGUAGE_CODE_TRANSLATES_MAP = {
+  [RUSSIAN_LANGUAGE_CODE]: 'Русский',
+  [ENGLISH_LANGUAGE_CODE]: 'English',
+} as const;
+export type AllowedLanguageCodes = keyof typeof LANGUAGE_CODE_TRANSLATES_MAP;

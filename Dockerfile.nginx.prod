@@ -1,0 +1,45 @@
+# --------------------------- Сборка фронта -----------------------------
+# Используем Node.js для сборки фронтенда
+FROM node:18-alpine AS build
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+RUN npm install -g pnpm --force
+# RUN npm install -g yarn --force
+
+# Копируем только файлы зависимостей
+COPY frontend/package.json .
+
+# Устанавливаем зависимости
+# RUN yarn install
+RUN pnpm install
+
+
+# Копируем проект и собираем его
+COPY frontend .
+
+# RUN npm run build
+RUN pnpm build
+
+# ----------------------------- Запуск nginx -----------------------------
+# Используем Nginx для сервинга собранных файлов
+FROM nginx:alpine AS production
+
+# Устанавливаем bash и cron
+RUN apk add --no-cache bash curl
+
+# Копируем заглушки
+ARG CERTBOT_DOMAIN
+COPY nginx/fullchain.pem /etc/letsencrypt/live/${CERTBOT_DOMAIN}/fullchain.pem
+COPY nginx/privkey.pem /etc/letsencrypt/live/${CERTBOT_DOMAIN}/privkey.pem
+
+
+# Копируем собранные файлы из предыдущего контейнера с фронтом
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Копируем конфигурацию Nginx, если требуется
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+# Точка входа: запускаем Nginx
+CMD ["nginx", "-g", "daemon off;"]

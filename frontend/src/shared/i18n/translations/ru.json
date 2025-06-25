@@ -1,0 +1,6 @@
+{
+  "translation": {
+    "product_with_barcode_not_found": "Продукт со штрихкодом {{barcode}} не был найден. Создайте его нажав кнопку \"+\"",
+    "product_info_owner": "Информация о продукте взята у {{product_info_owner}}"
+  }
+}

@@ -1,0 +1,31 @@
+# Используем образ с Python 3.12 для разработки
+FROM python:3.12-slim
+
+# Установить зависимости для сборки Postgres и Python-библиотек
+RUN apt-get update && apt-get install -y && \
+    apt-get install -y libpq-dev build-essential gcc && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файлы зависимостей
+COPY backend/requirements.txt .
+
+# Устанавливаем зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+# Необходим для отладки в докер контейнере
+# https://testdriven.io/blog/django-debugging-vs-code/
+RUN pip install debugpy
+
+# Копируем весь код бэкенда
+COPY backend/ .
+
+# Устанавливаем переменные окружения для разработки
+ENV DJANGO_SETTINGS_MODULE=backend.settings
+ENV PYTHONUNBUFFERED=1
+
+# Запускаем Django в режиме разработки
+# CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python3 manage.py migrate && python3 -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8000"]
+# CMD ["sh", "-c", "tail -f /dev/null"]
