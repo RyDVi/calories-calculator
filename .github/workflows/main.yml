@@ -1,0 +1,23 @@
+# workflows/main.yml
+name: Main Workflow
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Добавляем возможность ручного запуска
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  build-images:
+    uses: ./.github/workflows/build-docker-images.yml # Вызываем reusable workflow
+    secrets: inherit
+
+  deploy-app:
+    needs: build-images # Запускается только после успешного завершения build-images
+    uses: ./.github/workflows/deploy.yml # Вызываем reusable workflow
+    secrets: inherit

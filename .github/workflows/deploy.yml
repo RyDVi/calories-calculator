@@ -1,0 +1,148 @@
+# workflows/deploy.yml
+name: Deploy Django Backend and Vite (React) Food App
+
+on:
+  # push:
+  #   branches:
+  #     - main  # Триггер при пуше в ветку main
+  # pull_request:
+  #   branches: [ "main" ]
+  workflow_call:
+    secrets: # Объявляем все секреты
+      SERVER_USER:
+        required: true
+      SERVER_SSH_KEY:
+        required: true
+      POSTGRES_USER_PASSWORD:
+        required: true
+      TELEGRAM_BOT_TOKEN:
+        required: true
+      VK_TOKEN:
+        required: true
+      SENTRY_AUTH_TOKEN:
+        required: true
+      PGADMIN_DEFAULT_PASSWORD:
+        required: true
+      CERTBOT_EMAIL:
+        required: true
+      PROXY_API_KEY:
+        required: true
+      SENTRY_DSN:
+        required: true
+
+env:
+  REGISTRY: ghcr.io  # Используем GitHub Container Registry
+  IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
+  IMAGE_NAME_NGINX: ${{ github.repository }}/nginx
+  ALLOWED_HOSTS: ${{ vars.ALLOWED_HOSTS }}
+  BASE_URL: ${{ vars.BASE_URL }} 
+  BASE_API_URL: ${{ vars.BASE_API_URL }}
+  SERVER_HOST: ${{ vars.SERVER_HOST }}
+  POSTGRES_DB_NAME: ${{ vars.POSTGRES_DB_NAME }}
+  POSTGRES_USER_NAME: ${{ vars.POSTGRES_USER_NAME }}
+  PGADMIN_DEFAULT_EMAIL: ${{ vars.PGADMIN_DEFAULT_EMAIL }}
+  CERTBOT_DOMAIN: ${{ vars.CERTBOT_DOMAIN }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Creating .env file
+        run: |
+          echo "DEBUG=False" >> .env
+          echo "ALLOWED_HOSTS=${{ env.ALLOWED_HOSTS }}" >> .env
+          echo "BASE_URL=${{ env.BASE_URL }}" >> .env
+          echo "BASE_API_URL=${{ env.BASE_API_URL }}" >> .env
+          echo "SERVER_HOST=${{ env.SERVER_HOST }}" >> .env 
+
+          # postgres env
+          echo "POSTGRES_DB_NAME=${{ env.POSTGRES_DB_NAME }}" >> .env
+          echo "POSTGRES_USER_NAME=${{ env.POSTGRES_USER_NAME }}" >> .env
+          echo "POSTGRES_USER_PASSWORD=${{ secrets.POSTGRES_USER_PASSWORD }}" >> .env
+
+          # telegram
+          echo "TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}" >> .env
+
+          # VK
+          echo "VK_TOKEN=${{ secrets.VK_TOKEN }}" >> .env
+
+          # sentry
+          echo "SENTRY_AUTH_TOKEN=${{ secrets.SENTRY_AUTH_TOKEN }}" >> .env
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
+
+          # PGADMIN
+          echo "PGADMIN_DEFAULT_EMAIL=${{ env.PGADMIN_DEFAULT_EMAIL }}" >> .env
+          echo "PGADMIN_DEFAULT_PASSWORD=${{ secrets.PGADMIN_DEFAULT_PASSWORD }}" >> .env
+
+          # Certbot
+          echo "CERTBOT_EMAIL=${{ secrets.CERTBOT_EMAIL }}" >> .env
+          echo "CERTBOT_DOMAIN=${{ env.CERTBOT_DOMAIN }}" >> .env
+
+          # Docker Compose variables
+          echo "BACKEND_IMAGE=$(echo "ghcr.io/${{ github.repository }}/backend:main" | tr '[:upper:]' '[:lower:]')" >> .env
+          echo "NGINX_IMAGE=$(echo "ghcr.io/${{ github.repository }}/nginx:main" | tr '[:upper:]' '[:lower:]')" >> .env
+
+          # OPENSEARCH
+          echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${{ secrets.OPENSEARCH_INITIAL_ADMIN_PASSWORD }}" >> .env
+
+          # PROXY API
+          echo "PROXY_API_KEY=${{ secrets.PROXY_API_KEY }}" >> .env
+
+      - name: Clear Files
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ env.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          debug: true
+          script: |
+            rm -rf /var/www/foodstat/*
+            mkdir -p /var/www/foodstat/
+
+      # Копирование .env и docker-compose.prod.yml на удалённый сервер
+      - name: Copy .env and docker-compose.prod.yml via SSH
+        uses: appleboy/scp-action@v0.1.6
+        with:
+          host: ${{ env.SERVER_HOST }} # IP или домен сервера
+          username: ${{ secrets.SERVER_USER }} # Пользователь сервера
+          key: ${{ secrets.SERVER_SSH_KEY }} # SSH-ключ
+          # TODO: необходимо избавиться от копирования всего проекта. Нужны только .env и docker-compose.prod.yml
+          source: ./
+          target: /var/www/foodstat/ # Путь на сервере
+
+      # Авторизация в GitHub Container Registry (кроме PR)
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy with Docker Compose
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ env.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e # Останавливаем выполнение при возникновении ошибки
+            cd /var/www/foodstat/  # Переходим в директорию проекта
+
+            echo "Stopping and removing containers without volumes..."
+            docker compose -f docker-compose.prod.yml down
+
+            echo "Logging in to GitHub Container Registry..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            echo "Pulling latest images..."
+            docker compose -f docker-compose.prod.yml pull
+
+
+            echo "Starting new containers..."
+            docker compose -f docker-compose.prod.yml up -d # Запускаем контейнеры в фоновом режиме
+
+            echo "Deployment completed!"
